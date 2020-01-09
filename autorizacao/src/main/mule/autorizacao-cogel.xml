@@ -226,7 +226,7 @@ output application/json
 	<flow name="get:\userinfo\(email):MobileAPP-Cogel-config">
         <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" doc:id="5b90096b-5415-49c1-b83f-89b25dab175b">
             <ee:variables>
-                <ee:set-variable variableName="email"><![CDATA[attributes.uriParams.'email']]></ee:set-variable>
+                <ee:set-variable variableName="email"><![CDATA[attributes.uriParams.'email' ]]></ee:set-variable>
             </ee:variables>
         </ee:transform>
         <ldap:lookup doc:name="Lookup" doc:id="0f53536f-218d-4a86-8655-92848ddcd2d6" config-ref="LDAP_Configuration" dn="#[&quot;cn=&quot; ++ attributes.uriParams.'email' ++ &quot;,ou=Cidadaos,dc=semge,dc=poc&quot;]"/>

@@ -37,3 +37,15 @@ title: Autorizacao-Cogel
         body:
           application/json:
             example: !include exemplos/logout/post/logout_response.json
+
+/userinfo:
+  /{email}:
+      get:
+        displayName: Recuperar informações do usuário.
+        responses:
+          200:
+            body: 
+              application/json:
+          400:
+            body: 
+              application/json:
