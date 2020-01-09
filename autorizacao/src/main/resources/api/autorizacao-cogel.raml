@@ -1,0 +1,39 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/ca554d74-2844-4b7e-9b2f-e20af00c1b3a/ # 
+version: 1
+title: Autorizacao-Cogel
+
+/signup:
+  description: Esse endpoint realizara o cadastro de um novo usuário.
+  post:
+    displayName: Cadastrar usuário
+    body:
+      application/json:
+        example: !include exemplos/signup/post/signup_request.json
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include exemplos/signup/post/signup_response.json
+
+/token:
+  description: Esse endpoint de login retornará o token de acesso, desde que a solicitação contenha usuario e senha válidos.
+  post: 
+    displayName: Gerar token
+    body:
+      application/json:
+        example: !include exemplos/token/post/token_request.json
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include exemplos/token/post/token_response.json
+
+/logout:
+  post:
+    displayName: Realiza Logout da aplicação
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include exemplos/logout/post/logout_response.json
