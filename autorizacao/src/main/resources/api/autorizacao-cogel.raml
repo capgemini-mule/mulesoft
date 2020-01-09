@@ -49,3 +49,16 @@ title: Autorizacao-Cogel
           400:
             body: 
               application/json:
+
+/reset:
+  /{email}:
+    get:
+      displayName: Resetar senha.
+      responses:
+        200:
+          body:
+            application/json:
+        400:
+          body:
+            application/json:
+      

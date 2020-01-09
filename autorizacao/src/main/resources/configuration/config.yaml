@@ -2,3 +2,9 @@ ldap:
   dn: "cn=mulesoft,CN=Users,dc=semge,dc=poc"
   password: "X!wrU1m@S9zLTt?2AOyt"
   url: "ldap://191.232.197.156:389"
+email:
+  user: "poccogel2020@gmail.com"
+  password: "Mulesoft2020"
+  host: "imap.gmail.com"
+  port: "587"
+  from: "poccogel-noreply@gmail.com"
