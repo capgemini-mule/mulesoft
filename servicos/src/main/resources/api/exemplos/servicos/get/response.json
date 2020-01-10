@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1",
+    "icon": "ribbon",
+    "label": "Certificado Digital",
+    "acao": "./"
+  },
+  {
+    "id": "2",
+    "icon": "car",
+    "label": "Veículos e Condutores",
+    "acao": "./"
+  },
+  {
+    "id": "3",
+    "icon": "person",
+    "label": "Emissão de Carteira de Identidade",
+    "acao": "./"
+  },
+  {
+    "id": "4",
+    "icon": "book",
+    "label": "Inscrição de Matricula",
+    "acao": "./"
+  },
+  {
+    "id": "5",
+    "icon": "medkit",
+    "label": "Saúde",
+    "acao": "./"
+  },
+  {
+    "id": "6",
+    "icon": "unlock",
+    "label": "Segurança",
+    "acao": "./"
+  },
+  {
+    "id": "7",
+    "icon": "bus",
+    "label": "Rodovias e Transportes",
+    "acao": "./"
+  }
+]

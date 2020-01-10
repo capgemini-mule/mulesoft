@@ -1,0 +1,30 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/dc3079af-d042-47a5-9717-1f3d0b952947/ # 
+version: 1
+title: Servicos-Cogel
+
+traits:
+  jwt:
+    headers:
+      authorization:
+        description: Bearer <JWT>
+        type: string
+    responses:
+      400:
+        description: Token was not provided.
+      401:
+        description: Bad or expired token. To fix, you should re-authenticate the user.
+      403:
+        description: The client id validation failed.
+      503:
+        description: Error communicating with JWKS server.
+        
+/servicos:
+  get:
+    is: [jwt]
+    displayName: Recuperar informações dos serviços disponiveis.
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include exemplos/servicos/get/response.json
