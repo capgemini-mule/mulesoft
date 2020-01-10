@@ -1,0 +1,21 @@
+[
+	{
+		"tpi_cd_tipo_identificacao": 1,
+		"tpi_tp_tipo_identificacao": "rg",
+		"tpi_ds_tipo_identificacao": "Registro Geral",
+		"tpi_tp_tipo_pessoa": 0,
+		"tpi_st_ativo": true,
+		"tpi_tp_critica": 1,
+		"tpi_ds_formato": "formato de RG"
+	},
+	{
+		"tpi_cd_tipo_identificacao": 2,
+		"tpi_tp_tipo_identificacao": "cnh",
+		"tpi_ds_tipo_identificacao": "Carteira de Habilitação",
+		"tpi_tp_tipo_pessoa": 1,
+		"tpi_st_ativo": true,
+		"tpi_tp_critica": 0,
+		"tpi_ds_formato": "formato de CNH"
+	},
+	
+]
