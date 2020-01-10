@@ -1,0 +1,32 @@
+#%RAML 1.0
+title: TipoIdentificacao
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/48f3ff82-1df3-4a4c-a34d-bde550e45f53/
+description: Retorno os tipos de registros contidos na coluna tpi_ds_tipo_identificacao da integração A.
+mediaType:
+  - application/json
+version: 1.0.0
+protocols:
+  - HTTP
+  - HTTPS
+/tipoIdentificacao:
+  get:
+    displayName: tipoIdentificacao
+    description: Retorna lista com os registros dos tipos de identificação.
+    body: {}
+    responses:
+      "200":
+        body:
+          example:
+            strict: true
+            value:
+              "0":
+                tpi_cd_tipo_identificacao: 1
+                tpi_tp_tipo_identificacao: rg
+                tpi_ds_tipo_identificacao: registro geral
+                tpi_tp_tipo_pessoa: 0
+                tpi_st_ativo: true
+                tpi_tp_critica: 1
+                tpi_ds_formato: formato de RG
+          type: object
+    securedBy: []
+securedBy: []
