@@ -6,7 +6,11 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
     <apikit:config name="tipoidentificacao-service-config" api="tipoidentificacao-service.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <flow name="tipoidentificacao-service-main">
+    <configuration-properties doc:name="Configuration properties" doc:id="dbe4f981-66df-4390-aac8-e04247c009b3" file="configuration\config.yaml" />
+	<db:config name="IntegracaoA" doc:name="Database Config" doc:id="01ed51e9-5f2e-4c7a-b88d-183d16d5a0ad" >
+		<db:mssql-connection host="${database_config.servidor}" port="${database_config.port}" user="${database_config.user}" password="${database_config.password}" databaseName="${database_config.database}" />
+	</db:config>
+	<flow name="tipoidentificacao-service-main">
         <http:listener config-ref="tipoidentificacao-service-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
@@ -127,21 +131,21 @@ output application/json
     </flow>
     <flow name="get:\tipoIdentificacao:tipoidentificacao-service-config">
 		<logger level="INFO" message="get:\tipoIdentificacao:tipoidentificacao-service-config" />
-		<db:select doc:name="Select" doc:id="ee84e700-d9a6-4aee-a3f4-7d374e492d2c" />
+		<db:select doc:name="Select" doc:id="ee84e700-d9a6-4aee-a3f4-7d374e492d2c" config-ref="IntegracaoA">
+			<db:sql >SELECT tpi_cd_tipo_identificacao, tpi_ds_tipo_identificacao FROM Tipo_Identificacao
+</db:sql>
+		</db:select>
 		<ee:transform doc:name="Transform Message" doc:id="5004b8e9-1e29-4158-9794-341ed4bdd651">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-[{
-"tpi_cd_tipo_identificacao": 1,
-"tpi_tp_tipo_identificacao": "rg",
-"tpi_ds_tipo_identificacao": "registro geral",
-"tpi_tp_tipo_pessoa": 0,
-"tpi_st_ativo": true,
-"tpi_tp_critica": 1,
-"tpi_ds_formato": "formato de RG"
-}]]]></ee:set-payload>
+
+payload map(data, index) -> {
+	"tpi_ds_tipo_identificacao": data.tpi_ds_tipo_identificacao,
+	"tpi_tp_tipo_identificacao": data.tpi_tp_tipo_identificacao
+}
+]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
     </flow>
