@@ -1,0 +1,109 @@
+#%RAML 1.0
+title: Orgãos Prefeitura Service
+description: Contém nomes de órgãos da Prefeitura Municipal do Salvador, suas siglas e um código de identificação.
+mediaType:
+  - application/json
+protocols:
+  - HTTP
+  - HTTPS
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/6d61ebd2-e92b-436c-9ac9-b22f2c7749b0/
+version: 1.0
+/orgaos:
+  get:
+    displayName: Lista órgãos
+    description: Lista órgãos da Prefeitura Municipal do Salvador.
+    headers:
+      Authorization:
+        example: Bearer TOKEN
+        type: string
+      Content-Type:
+        example: application/json
+        type: string
+    body: {}
+    responses:
+      "200":
+        body:
+          application/json:
+            example:
+              strict: true
+              value:
+                "0":
+                  codigo: 1
+                  sigla: VP
+                  nome: Vice Prefeitura
+            type: object
+    securedBy: []
+  post:
+    displayName: Cria orgão
+    description: cria um novo órgão da Prefeitura Municipal do Salvador.
+    headers:
+      Authorization:
+        example: Bearer TOKEN
+        type: string
+      Content-Type:
+        example: application/json
+        type: string
+    body:
+      application/json:
+        example:
+          strict: true
+          value:
+            codigo: 1
+            sigla: CC
+            nome: Casa Civil
+        type: object
+    responses:
+      "200":
+        body:
+          example:
+            strict: true
+            value:
+              message: Órgão criado com sucesso!
+          type: object
+    securedBy: []
+/orgaos/{id}:
+  put:
+    displayName: Altera Órgão
+    description: Altera órgão da Prefeitura Municipal do Salvador.
+    headers:
+      Authorization:
+        example: Bearer TOKEN
+        type: string
+      Content-Type:
+        example: application/json
+        type: string
+    body:
+      application/json:
+        example:
+          strict: true
+          value:
+            codigo: 1
+            sigla: CC
+            nome: Casa Civil
+        type: object
+    responses:
+      "200":
+        body:
+          example:
+            strict: true
+            value:
+              message: Órgão alterado com sucesso
+          type: object
+  delete:
+    displayName: Deleta Órgão
+    description: Deleta órgão da Prefeitura Municipal do Salvador.
+    headers:
+      Authorization:
+        example: Bearer TOKEN
+        type: string
+      Content-Type:
+        example: application/json
+        type: string
+    responses:
+      "200":
+        body:
+          example:
+            strict: true
+            value:
+              message: Órgão apagado com sucesso!
+          type: object
