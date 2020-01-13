@@ -3,6 +3,22 @@ baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/ca554d74-2844-4b7e-9
 version: 1
 title: Autorizacao-Cogel
 
+traits:
+  jwt:
+    headers:
+      authorization:
+        description: Bearer <JWT>
+        type: string
+    responses:
+      400:
+        description: Token was not provided.
+      401:
+        description: Bad or expired token. To fix, you should re-authenticate the user.
+      403:
+        description: The client id validation failed.
+      503:
+        description: Error communicating with JWKS server.
+
 /signup:
   description: Esse endpoint realizara o cadastro de um novo usuário.
   post:
@@ -46,9 +62,11 @@ title: Autorizacao-Cogel
           200:
             body: 
               application/json:
+				example: !include exemplos/userinfo/email/get/response.json
           400:
             body: 
               application/json:
+				example: !include exemplos/userinfo/email/get/error.json
 
 /reset:
   /{email}:
@@ -61,4 +79,3 @@ title: Autorizacao-Cogel
         400:
           body:
             application/json:
-      

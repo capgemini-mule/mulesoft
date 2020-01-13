@@ -1,4 +1,4 @@
-database:
+database_config:
   servidor: "177.20.4.61"
   rdbms: "Microsoft SQL Server"
   authentication: "SQL Server authentication"
