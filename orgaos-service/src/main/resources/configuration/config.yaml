@@ -1,0 +1,7 @@
+database_config:
+  servidor: "172.20.12.201"
+  rdbms: "PostgreSQL"
+  port: "5432"
+  user: "spmpoc"
+  password: "spmpoc"
+  database: "sipe-poc"

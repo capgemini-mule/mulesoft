@@ -1,109 +1,71 @@
 #%RAML 1.0
-title: Orgãos Prefeitura Service
-description: Contém nomes de órgãos da Prefeitura Municipal do Salvador, suas siglas e um código de identificação.
-mediaType:
-  - application/json
-protocols:
-  - HTTP
-  - HTTPS
 baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/6d61ebd2-e92b-436c-9ac9-b22f2c7749b0/
-version: 1.0
+version: 2.0.0
+title: Orgaos-Cogel
+
+traits:
+  jwt:
+    headers:
+      authorization:
+        description: Bearer <JWT>
+        type: string
+    responses:
+      400:
+        description: Token was not provided.
+      401:
+        description: Bad or expired token. To fix, you should re-authenticate the user.
+      403:
+        description: The client id validation failed.
+      503:
+        description: Error communicating with JWKS server.
+
+description: Contém nomes de órgãos da Prefeitura Municipal do Salvador, suas siglas e um código de identificação.
+
 /orgaos:
   get:
+    is: [jwt]
     displayName: Lista órgãos
     description: Lista órgãos da Prefeitura Municipal do Salvador.
-    headers:
-      Authorization:
-        example: Bearer TOKEN
-        type: string
-      Content-Type:
-        example: application/json
-        type: string
-    body: {}
     responses:
       "200":
         body:
           application/json:
-            example:
-              strict: true
-              value:
-                "0":
-                  codigo: 1
-                  sigla: VP
-                  nome: Vice Prefeitura
-            type: object
-    securedBy: []
+            example: !include exemplos/orgaos/get/response.json
+                  
   post:
+    is: [jwt]
     displayName: Cria orgão
-    description: cria um novo órgão da Prefeitura Municipal do Salvador.
-    headers:
-      Authorization:
-        example: Bearer TOKEN
-        type: string
-      Content-Type:
-        example: application/json
-        type: string
+    description: Cria um novo órgão da Prefeitura Municipal do Salvador.
     body:
       application/json:
-        example:
-          strict: true
-          value:
-            codigo: 1
-            sigla: CC
-            nome: Casa Civil
-        type: object
+        example: !include exemplos/orgaos/post/request.json
     responses:
-      "200":
+      200:
         body:
-          example:
-            strict: true
-            value:
-              message: Órgão criado com sucesso!
-          type: object
-    securedBy: []
-/orgaos/{id}:
-  put:
-    displayName: Altera Órgão
-    description: Altera órgão da Prefeitura Municipal do Salvador.
-    headers:
-      Authorization:
-        example: Bearer TOKEN
-        type: string
-      Content-Type:
-        example: application/json
-        type: string
-    body:
-      application/json:
-        example:
-          strict: true
-          value:
-            codigo: 1
-            sigla: CC
-            nome: Casa Civil
-        type: object
-    responses:
-      "200":
-        body:
-          example:
-            strict: true
-            value:
-              message: Órgão alterado com sucesso
-          type: object
-  delete:
-    displayName: Deleta Órgão
-    description: Deleta órgão da Prefeitura Municipal do Salvador.
-    headers:
-      Authorization:
-        example: Bearer TOKEN
-        type: string
-      Content-Type:
-        example: application/json
-        type: string
-    responses:
-      "200":
-        body:
-          example:
-            strict: true
-            value:
-              message: Órgão apagado com sucesso!
-          type: object
+          application/json:
+            example: !include exemplos/orgaos/post/response.json
+
+  /{id}:
+    put:
+      is: [jwt]
+      displayName: Altera Órgão
+      description: Altera órgão da Prefeitura Municipal do Salvador.
+      body:
+        application/json:
+          example: !include exemplos/orgaos/id/put/request.json
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include exemplos/orgaos/id/put/response.json
+
+    delete:
+      is: [jwt]
+      displayName: Deleta Órgão
+      description: Deleta órgão da Prefeitura Municipal do Salvador.
+      responses:
+        "200":
+          body:
+            application/json:
+              example: !include exemplos/orgaos/id/delete/response.json
+
