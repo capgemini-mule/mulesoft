@@ -1,0 +1,6 @@
+db:
+  host: "172.20.12.201"
+  port: "5432"
+  user: "spmpoc"
+  pwd: "spmpoc"
+  database: "sipe-poc"
