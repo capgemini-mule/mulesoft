@@ -6,6 +6,9 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
     </http:listener-config>
     <apikit:config name="orgaos-cogel-config" api="orgaos-service.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <configuration-properties doc:name="Configuration properties" doc:id="4c042805-641e-48d1-94d9-33d59b32255c" file="configuration\config.yaml" />
+	<db:config name="IntegracaoB" doc:name="Database Config" doc:id="87101924-bb82-460e-ad5b-815d9ca07e3a" >
+		<db:generic-connection url="${database_config.url}" driverClassName="${database_config.driver_name}" user="${database_config.user}" password="${database_config.password}" />
+	</db:config>
 	<flow name="orgaos-cogel-main">
         <http:listener config-ref="orgaos-cogel-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -160,15 +163,19 @@ output application/json
         </ee:transform>
     </flow>
     <flow name="get:\orgaos:orgaos-cogel-config">
-		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+		<db:select doc:name="Select" doc:id="de069e37-8c3a-4bd4-8be4-01cea01355ea" config-ref="IntegracaoB">
+			<db:sql >SELECT * FROM orgao</db:sql>
+		</db:select>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="4d647dfc-d6c5-4eb8-a8c9-c191fbd38724">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{
-  codigo: "1",
-  sigla: "VP",
-  nome: "Vice Prefeitura"
+
+payload map(data, index) -> {
+	"codigo": data.codigo,
+	"nome":  data.nome,
+	"sigla": data.sigla
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
