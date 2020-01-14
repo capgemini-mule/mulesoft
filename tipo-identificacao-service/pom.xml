@@ -66,6 +66,13 @@
             <artifactId>mssql-jdbc</artifactId>
             <version>6.2.2.jre8</version>
         </dependency>
+    	<dependency>
+            <groupId>5516948f-b6a3-4287-8522-29b5a750efac</groupId>
+            <artifactId>tipoidentificacao-service</artifactId>
+            <version>1.0.2</version>
+            <classifier>raml</classifier>
+            <type>zip</type>
+        </dependency>
     </dependencies>
 
 	<repositories>
