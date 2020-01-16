@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
-    <http:listener-config name="tipoidentificacao-cogel-httpListenerConfig">
+    <http:listener-config name="orgaos-cogel-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="tipoidentificacao-cogel-config" api="resource::5516948f-b6a3-4287-8522-29b5a750efac:tipoidentificacao-cogel:2.0.0:raml:zip:tipoidentificacao-cogel.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <configuration-properties doc:name="Configuration properties" doc:id="63084654-4d1d-443a-9b47-e94ff361eaa1" file="config/config.yaml" />
-	<db:config name="db_integracao_A" doc:name="Database Config" doc:id="92ac45eb-a1da-4bed-898b-2795a2f83607" >
-		<db:mssql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.pwd}" databaseName="${db.database}" />
+    <apikit:config name="orgaos-cogel-config" api="resource::5516948f-b6a3-4287-8522-29b5a750efac:orgaos-cogel:2.0.0:raml:zip:orgaos-cogel.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <configuration-properties doc:name="Configuration properties" doc:id="6df63f92-5ab3-4c75-a8c6-4d363f0233f4" file="config/config.yaml" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="db644f9c-eda4-4557-81da-56be1616f7a5" transactionalAction="JOIN_IF_POSSIBLE" queryTimeout="0" targetValue="#[payload]" queryTimeoutUnit="SECONDS" >
+		<db:generic-connection url="jdbc:postgresql://177.20.4.61:5432/sipe-poc?user=spmpoc&amp;passsword=spmpoc" driverClassName="org.postgresql.Driver"/>
 	</db:config>
-	<flow name="tipoidentificacao-cogel-main">
-        <http:listener config-ref="tipoidentificacao-cogel-httpListenerConfig" path="/api/*">
+	<flow name="orgaos-cogel-main">
+        <http:listener config-ref="orgaos-cogel-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
             </http:response>
@@ -19,7 +19,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
             </http:error-response>
         </http:listener>
-        <apikit:router config-ref="tipoidentificacao-cogel-config" />
+        <apikit:router config-ref="orgaos-cogel-config" />
         <error-handler>
             <on-error-propagate type="APIKIT:BAD_REQUEST">
                 <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
@@ -101,8 +101,8 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="tipoidentificacao-cogel-console">
-        <http:listener config-ref="tipoidentificacao-cogel-httpListenerConfig" path="/console/*">
+    <flow name="orgaos-cogel-console">
+        <http:listener config-ref="orgaos-cogel-httpListenerConfig" path="/console/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
             </http:response>
@@ -111,7 +111,7 @@ output application/json
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
             </http:error-response>
         </http:listener>
-        <apikit:console config-ref="tipoidentificacao-cogel-config" />
+        <apikit:console config-ref="orgaos-cogel-config" />
         <error-handler>
             <on-error-propagate type="APIKIT:NOT_FOUND">
                 <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
@@ -128,21 +128,64 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="get:\tipoIdentificacao:tipoidentificacao-cogel-config">
-        <db:select doc:name="Select" doc:id="c509f0f9-03ac-4b77-8fcb-d890fde5e258" config-ref="db_integracao_A">
-			<db:sql >SELECT tpi_tp_tipo_identificacao, tpi_ds_tipo_identificacao FROM Tipo_Identificacao</db:sql>
-		</db:select>
-		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="6a4b9974-94bf-4fe3-9a85-2e2ce669ffdc">
+    <flow name="put:\orgaos\(id):application\json:orgaos-cogel-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-
-payload map (value, index) -> {
-	
-    tpi_ds_tipo_identificacao: value.tpi_ds_tipo_identificacao,
-    tpi_tp_tipo_identificacao: value.tpi_tp_tipo_identificacao
-  }]]></ee:set-payload>
+{
+  message: "Órgão alterado com sucesso"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\orgaos\(id):orgaos-cogel-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Órgão apagado com sucesso!"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\orgaos:orgaos-cogel-config">
+        <db:select doc:name="Select" doc:id="db644f9c-eda4-4557-81da-56be1616f7a5" />
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="4e908316-adda-4c8d-9fbe-974ddab087a5">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  codigo: "1",
+  sigla: "VP",
+  nome: "Vice Prefeitura"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\orgaos:application\json:orgaos-cogel-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Órgão criado com sucesso!"
+}]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
