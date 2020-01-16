@@ -130,7 +130,7 @@ output application/json
     </flow>
     <flow name="get:\tipoIdentificacao:tipoidentificacao-cogel-config">
         <db:select doc:name="Select" doc:id="c509f0f9-03ac-4b77-8fcb-d890fde5e258" config-ref="db_integracao_A">
-			<db:sql >SELECT tpi_tp_tipo_identificacao, tpi_ds_tipo_identificacao FROM Tipo_Identificacao</db:sql>
+			<db:sql >SELECT tpi_ds_tipo_identificacao FROM Tipo_Identificacao</db:sql>
 		</db:select>
 		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="6a4b9974-94bf-4fe3-9a85-2e2ce669ffdc">
             <ee:message>
@@ -139,10 +139,8 @@ output application/json
 ---
 
 payload map (value, index) -> {
-	
-    tpi_ds_tipo_identificacao: value.tpi_ds_tipo_identificacao,
-    tpi_tp_tipo_identificacao: value.tpi_tp_tipo_identificacao
-  }]]></ee:set-payload>
+    tpi_ds_tipo_identificacao: value.tpi_ds_tipo_identificacao
+}]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
