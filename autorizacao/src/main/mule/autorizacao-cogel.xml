@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:ldap="http://www.mulesoft.org/schema/mule/ldap" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:ldap="http://www.mulesoft.org/schema/mule/ldap" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/ldap http://www.mulesoft.org/schema/mule/ldap/current/mule-ldap.xsd
 http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
-http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
-http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+
+    
     <http:listener-config name="MobileAPP-Cogel-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
     <apikit:config name="MobileAPP-Cogel-config"  outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" raml="autorizacao-cogel.raml"/>
-    <configuration-properties doc:name="Configuration properties" doc:id="ae9fcfd0-b8fc-45ba-9b56-a54a4807dc3d" file="configuration/config.yaml" />
-	<ldap:config name="LDAP_Configuration" doc:name="LDAP Configuration" doc:id="cceb41e3-134d-4b0d-b9cc-d7e332fef831" >
+    <configuration-properties doc:name="Configuration properties" doc:id="d5f15eca-8e60-4a00-ba84-9b37824dc9cc" file="configuration/config.yaml" />
+	<ldap:config name="LDAP_Configuration" doc:name="LDAP Configuration" doc:id="abbe3c98-ec9c-43f3-8c03-24e0a0efaeb1" >
 		<ldap:basic-connection authDn="${ldap.dn}" authPassword="${ldap.password}" url="${ldap.url}" />
 	</ldap:config>
-	<ldap:config name="LDAP_Configuration2" doc:name="LDAP Configuration" doc:id="6d7eba18-ad07-4f46-8869-b36d6b656322" >
-		<ldap:basic-connection authDn="${ldap.dn}" authPassword="${ldap.password}" url="${ldap.url}" />
+	<ldap:config name="LDAP_Configuration2" doc:name="LDAP Configuration" doc:id="2cfd68f0-253f-46b7-bd36-f084c821d84e" >
+		<ldap:tls-connection authDn="${ldap.dn}"
+                            authPassword="${ldap.password}" url="${ldap.fqdm_tls}">
+		    <ldap:extended-configurations>
+		        <ldap:extended-configuration key="org.mule.module.ldap.trustStorePath" value="${keystore.path}" />
+		        <ldap:extended-configuration key="org.mule.module.ldap.trustStorePassword" value="${keystore.password}"     />
+		    </ldap:extended-configurations>
+		</ldap:tls-connection>
 	</ldap:config>
 	
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="d2026acf-2e51-4542-950f-e5e5e147d343" >
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="f73e33c4-d794-4f2d-93fb-9a7b331d5472" >
 		<http:request-connection protocol="HTTPS" host="pocsemge.brazilsouth.cloudapp.azure.com">
 			<tls:context >
 				<tls:trust-store insecure="true" />
 			</tls:context>
 		</http:request-connection>
 	</http:request-config>
-	<tls:context name="TLS_Context" doc:name="TLS Context" doc:id="0c067e29-9aff-4da2-9b1e-c9028ba89f79" >
-		<tls:trust-store password="capgemini" type="jks" />
-		<tls:key-store type="jks" path="./../server.jks" alias="cogel" keyPassword="capgemini" password="capgemini" />
-	</tls:context>
-	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="057303d2-e870-4714-b5ee-98d5e28e25f4" >
-		<email:smtp-connection host="${email.host}" port="${email.port}" user="${email.user}" password="${email.password}">
-		</email:smtp-connection>
-		</email:smtp-config>
-		
 	<flow name="MobileAPP-Cogel-main">
         <http:listener config-ref="MobileAPP-Cogel-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -151,28 +149,39 @@ output application/json
         </error-handler>
     </flow>
     <flow name="post:\signup:application\json:MobileAPP-Cogel-config">
-        <set-variable value='#["cn=" ++ payload.email  ++ ",ou=Cidadaos,dc=semge,dc=poc"]' doc:name="Set Variable" doc:id="973a4385-d13e-411c-945f-d4005282380b" variableName="dn"/>
-		<ee:transform doc:name="Transform Message" doc:id="6c82b412-2f34-4cf5-a393-d5701d631b05" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+        <logger level="INFO" doc:name="Logger" doc:id="7d5c9865-bb9b-4ddc-be53-e8c148c9972f" message='"inicio ${mule.home}/apps/${app.name}/server.jks"'/>
+		<set-variable value='#["cn=" ++ payload.email  ++ ",ou=Cidadaos,dc=semge,dc=poc"]' doc:name="Set Variable" doc:id="7ced0c17-fe75-4abb-a11f-6475770efadd" variableName="dn"/>
+		<ee:transform doc:name="Transform Message" doc:id="50287fc6-6ed3-4474-8a6d-63c076b158cc">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
 ---
+
 {
 	dn : "cn=" ++ payload.email  ++ ",ou=Cidadaos,dc=semge,dc=poc",
 	uid : payload.cpf ,
-	userPrincipalName : payload.nome ++ " " ++ payload.sobrenome,
+	userPrincipalName : payload.email,
 	cn : payload.email,
-	//name: payload.nome,
 	givenName: payload.nome,
 	sn : payload.sobrenome,
 	userPassword : payload.senha,
 	mail : payload.email ,
-	objectclass : ["top", "person", "organizationalPerson","user", "inetOrgPerson"]
-}]]></ee:set-payload>
+	pwdLastSet: "-1",
+	lockoutTime: "0",
+	//unicodePwd: Toolbox::getUnicodePwd(payload.senha),
+	userAccountControl: "544",
+	objectclass : ["top", "person", "organizationalPerson", "user"]
+}
+
+]]></ee:set-payload>
 			</ee:message>
+			<ee:variables>
+			</ee:variables>
 		</ee:transform>
-		<ldap:add doc:name="Add entry" doc:id="1d92f8d0-16ae-435e-b06f-ced75e535f15" config-ref="LDAP_Configuration" structuralObjectClass="top"/>
-		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="9e06d9ba-5c0d-4ae0-8685-ec3ebf20d063">
+		<logger level="INFO" doc:name="Logger" doc:id="294bf225-4ba7-4b92-b786-2ea097bf108b" message="#[payload]"/>
+		<ldap:add doc:name="Add entry" doc:id="509aabd0-761c-4afa-880d-48b8ba789399" config-ref="LDAP_Configuration2" structuralObjectClass="user"/>
+		<logger level="INFO" doc:name="Logger" doc:id="521dd08d-969d-4b3f-adcd-21c552be54f5" message='#["fim"]'/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="b46d176f-c80a-40ae-92da-8b74ae3771fa">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -183,9 +192,10 @@ output application/json
             </ee:message>
         </ee:transform>
 		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="87c07e7b-20e9-431b-9266-4ced8e6ec540" type="LDAP:NAME_ALREADY_BOUND">
-				<logger level="INFO" doc:name="Logger" doc:id="30c2916d-70aa-4c3f-b12e-eb55b156b830" message='#["nao foi cadastrado - erro!"]' />
-				<ee:transform doc:name="Copy_of_Transform Message" doc:id="0163e63f-d4cf-4617-8894-2a43a6b7da7e" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d94bad48-9799-4957-806c-405819c7cc22" type="LDAP:NAME_ALREADY_BOUND">
+				<logger level="INFO" doc:name="Logger" doc:id="dca586d1-8923-4752-b4c3-978ee8026ec9" message='#["nao foi cadastrado - erro!"]' />
+				<ldap:modify-single-value-attribute doc:name="Alterar a senha (novasenha)" doc:id="ce3ef16e-9763-4ac4-834f-737f67fb34b5" config-ref="LDAP_Configuration2" dn="#[vars.dn]" attributeName="userPassword" attributeValue="123mudar" />
+				<ee:transform doc:name="Copy_of_Transform Message" doc:id="6efb2d5a-e684-4808-a640-dffdfd60767f" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -199,7 +209,7 @@ output application/json
 		</error-handler>
     </flow>
 	<flow name="post:\token:application\json:MobileAPP-Cogel-config">
-		<ee:transform doc:name="Transform Message" doc:id="9c176596-539f-4618-ae9f-e218362419f9" >
+		<ee:transform doc:name="Transform Message" doc:id="3f2b3458-da1a-4433-bb07-5a386d5ac5bc" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 import * from dw::core::URL
@@ -214,9 +224,9 @@ output application/x-www-form-urlencoded
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<http:request method="POST" doc:name="Request" doc:id="5c959935-d373-4d7e-b198-6f06b8ac3094" path="/adfs/oauth2/token" config-ref="HTTP_Request_configuration">
+		<http:request method="POST" doc:name="Request" doc:id="7a0ee3a9-4a2a-4072-acde-35389e1bc1ac" path="/adfs/oauth2/token" config-ref="HTTP_Request_configuration">
 		</http:request>
-		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="6a759f0c-862d-4878-9da2-c5e889e3aebc">
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="5109a3c0-a15b-4436-b42b-b178cd403d69">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -229,30 +239,14 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
-	<flow name="post:\logout:MobileAPP-Cogel-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd 
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="e57c97b4-f4fa-489c-8456-701588e32f75">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "O usuário realizou logout com sucesso."
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-    </flow>
 	<flow name="get:\userinfo\(email):MobileAPP-Cogel-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" doc:id="5b90096b-5415-49c1-b83f-89b25dab175b">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" doc:id="641944dc-8630-4684-81a1-2615606405f4">
             <ee:variables>
-                <ee:set-variable variableName="email"><![CDATA[attributes.uriParams.'email' ]]></ee:set-variable>
+                <ee:set-variable variableName="email"><![CDATA[attributes.uriParams.'email']]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <ldap:lookup doc:name="Lookup" doc:id="0f53536f-218d-4a86-8655-92848ddcd2d6" config-ref="LDAP_Configuration" dn="#[&quot;cn=&quot; ++ attributes.uriParams.'email' ++ &quot;,ou=Cidadaos,dc=semge,dc=poc&quot;]"/>
-		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="831cd678-226c-40e1-944a-ab135df060e4">
+        <ldap:lookup doc:name="Lookup" doc:id="39fea4fc-f412-4dee-b434-eb2e2f003035" config-ref="LDAP_Configuration" dn="#[&quot;cn=&quot; ++ attributes.uriParams.'email' ++ &quot;,ou=Cidadaos,dc=semge,dc=poc&quot;]"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="5d1ebbe3-5d14-472b-a7cc-b4ac87b411e9">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -269,31 +263,125 @@ import * from dw::core::Strings
             </ee:message>
         </ee:transform>
     </flow>
-	<flow name="get:\reset\(email)" doc:id="31d75776-159a-4cef-9128-f21e8f86b5aa" >
-		<ee:transform doc:name="Transform Message" doc:id="bf0adac3-ca29-4738-8d89-46c4b9ef899f" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[attributes.uriParams.'email']]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<ldap:lookup doc:name="Lookup" doc:id="fea01f0a-942f-45e2-835c-a29f7d79eb3d" dn="#[&quot;cn=&quot; ++ attributes.uriParams.'email' ++ &quot;,ou=Cidadaos,dc=semge,dc=poc&quot;]" config-ref="LDAP_Configuration"/>
-		<set-variable value="#[payload.mail]" doc:name="Set Variable" doc:id="fede37e7-40df-4cf3-8f50-78764d149781" variableName="email"/>
-		<email:send doc:name="Send" doc:id="a271e98a-723c-49e7-82a5-055110b67e30" config-ref="Email_SMTP" fromAddress="${email.from}">
-			<email:to-addresses >
-				<email:to-address value="#[payload.mail]" />
-			</email:to-addresses>
-			<email:body >
-				<email:content ><![CDATA[#["<div>Olá " ++ vars.email ++ ", Foi pedido para redefinir sua senha na COGEL. Por favor clique no link para redefinir: <br /><a href='LINK' target='_blank'>LINK</a><br /></div>"]]]></email:content>
-			</email:body>
-		</email:send>
-		<ee:transform doc:name="Transform Message" doc:id="2f11bf0d-a213-4a93-b42c-0a389cc13aa1" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+	<flow name="get:\services:MobileAPP-Cogel-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="000cd4ef-e8a9-4511-9465-de09fed55337">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    id: "1",
+    icon: "ribbon",
+    label: "Certificado Digital",
+    acao: "./"
+  }, 
+  {
+    id: "2",
+    icon: "car",
+    label: "Veículos e Condutores",
+    acao: "./"
+  }, 
+  {
+    id: "3",
+    icon: "person",
+    label: "Emissão de Carteira de Identidade",
+    acao: "./"
+  }, 
+  {
+    id: "4",
+    icon: "book",
+    label: "Educação",
+    acao: "./"
+  }, 
+  {
+    id: "5",
+    icon: "medkit",
+    label: "Saúde",
+    acao: "./"
+  }, 
+  {
+    id: "6",
+    icon: "unlock",
+    label: "Segurança",
+    acao: "./"
+  }, 
+  {
+    id: "7",
+    icon: "bus",
+    label: "Rodovias e Transportes",
+    acao: "./"
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="get:\favorites:MobileAPP-Cogel-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    id: "1",
+    icon: "ribbon",
+    label: "Certificado Digital",
+    acao: "./"
+  }, 
+  {
+    id: "2",
+    icon: "car",
+    label: "Veículos e Condutores",
+    acao: "./"
+  }, 
+  {
+    id: "3",
+    icon: "person",
+    label: "Emissão de Carteira de Identidade",
+    acao: "./"
+  }, 
+  {
+    id: "4",
+    icon: "book",
+    label: "Educação",
+    acao: "./"
+  }, 
+  {
+    id: "5",
+    icon: "medkit",
+    label: "Saúde",
+    acao: "./"
+  }, 
+  {
+    id: "6",
+    icon: "unlock",
+    label: "Segurança",
+    acao: "./"
+  }, 
+  {
+    id: "7",
+    icon: "bus",
+    label: "Rodovias e Transportes",
+    acao: "./"
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\logout:MobileAPP-Cogel-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="9f096550-e9f5-4764-ab18-b7f21206e84a">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	message: "Email enviado com sucesso!"
+  message: "O usuário realizou logout com sucesso."
 }]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
+            </ee:message>
+        </ee:transform>
+    </flow>
 </mule>
