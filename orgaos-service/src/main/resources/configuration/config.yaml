@@ -1,9 +1,0 @@
-database_config:
-  url: "jdbc:postgresql://172.20.12.201:5432/sipe-poc"
-  driver_name: "org.postgresql.Driver"
-  servidor: "172.20.12.201"
-  rdbms: "PostgreSQL"
-  port: "5432"
-  user: "spmpoc"
-  password: "spmpoc"
-  database: "sipe-poc"
