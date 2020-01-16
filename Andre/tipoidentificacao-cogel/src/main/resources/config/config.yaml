@@ -1,0 +1,6 @@
+db:
+  host: "177.20.4.61"
+  port: "1433"
+  user: "spmpoc"
+  pwd: "spmpoc"
+  database: "eProtocolo"
