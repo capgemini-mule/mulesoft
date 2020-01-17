@@ -5,10 +5,10 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
     <apikit:config name="orgaos-cogel-config" api="resource::5516948f-b6a3-4287-8522-29b5a750efac:orgaos-cogel:2.0.0:raml:zip:orgaos-cogel.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <configuration-properties doc:name="Configuration properties" doc:id="6df63f92-5ab3-4c75-a8c6-4d363f0233f4" file="config/config.yaml" />
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="db644f9c-eda4-4557-81da-56be1616f7a5" transactionalAction="JOIN_IF_POSSIBLE" queryTimeout="0" targetValue="#[payload]" queryTimeoutUnit="SECONDS" >
-		<db:generic-connection url="jdbc:postgresql://177.20.4.61:5432/sipe-poc?user=spmpoc&amp;passsword=spmpoc" driverClassName="org.postgresql.Driver"/>
+	<db:config name="PostgreSQL" doc:name="Database Config" doc:id="357fcefa-42d4-4470-835f-874c71eb59c1" >
+		<db:generic-connection url="${db.url}" driverClassName="${db.driver}" user="${db.user}" password="${db.pwd}"/>
 	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="0d0e7846-4ae6-4dde-8016-e4ef404f7271" file="config/config.yaml" />
 	<flow name="orgaos-cogel-main">
         <http:listener config-ref="orgaos-cogel-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -22,7 +22,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
         <apikit:router config-ref="orgaos-cogel-config" />
         <error-handler>
             <on-error-propagate type="APIKIT:BAD_REQUEST">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="0fd66d3c-6ff0-41fb-94e8-328e552427e9">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -30,12 +30,12 @@ output application/json
 {message: "Bad request"}]]></ee:set-payload>
                     </ee:message>
                     <ee:variables>
-                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:NOT_FOUND">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="8387002e-dbd5-45a8-9365-9ceff9db40c8">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -43,12 +43,12 @@ output application/json
 {message: "Resource not found"}]]></ee:set-payload>
                     </ee:message>
                     <ee:variables>
-                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="595394c3-57e9-4450-a32c-fff486ae0593">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -56,12 +56,12 @@ output application/json
 {message: "Method not allowed"}]]></ee:set-payload>
                     </ee:message>
                     <ee:variables>
-                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[405]]></ee:set-variable>
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="e6f8943f-d5a7-459e-9d48-4902d34edde5">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -69,7 +69,7 @@ output application/json
 {message: "Not acceptable"}]]></ee:set-payload>
                     </ee:message>
                     <ee:variables>
-                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
@@ -129,56 +129,71 @@ output application/json
         </error-handler>
     </flow>
     <flow name="put:\orgaos\(id):application\json:orgaos-cogel-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" doc:id="2a38f2a2-7348-4077-af47-4fbc4510472f">
             <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+                <ee:set-variable variableName="id"><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+        <db:update doc:name="Update" doc:id="5b61abb8-59a6-41ff-a1da-415a16f788b9" config-ref="PostgreSQL">
+			<db:sql >UPDATE orgao SET nome = :nome, sigla = :sigla WHERE codigo = :codigo</db:sql>
+			<db:input-parameters ><![CDATA[#[{codigo: message.attributes.uriParams.id, nome: payload.nome, sigla: payload.sigla}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="8a719a34-e05c-4c41-b25d-3244c3aa11eb">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
-  message: "Órgão alterado com sucesso"
+  message: "Órgão alterado com sucesso!"
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
     <flow name="delete:\orgaos\(id):orgaos-cogel-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" doc:id="ab85a526-ee7d-44d2-8da4-f5d078f4072a">
             <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+                <ee:set-variable variableName="id"><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+        <db:delete doc:name="Delete" doc:id="c8eccbb0-a8bd-4d12-a42b-9f0ad7a544f9" config-ref="PostgreSQL">
+			<db:sql >DELETE FROM orgao WHERE codigo = :codigo</db:sql>
+			<db:input-parameters ><![CDATA[#[{codigo: message.attributes.uriParams.id}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="5191e84e-ee05-47fe-8280-fb7b6d741862">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
-  message: "Órgão apagado com sucesso!"
+  message: "Órgão deletado com sucesso!"
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
     <flow name="get:\orgaos:orgaos-cogel-config">
-        <db:select doc:name="Select" doc:id="db644f9c-eda4-4557-81da-56be1616f7a5" />
-		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="4e908316-adda-4c8d-9fbe-974ddab087a5">
+        <db:select doc:name="Select" doc:id="2987fab1-00fe-417d-951b-5ca97305a9cc" config-ref="PostgreSQL">
+			<db:sql >SELECT * FROM orgao</db:sql>
+		</db:select>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="2ff59044-f660-44e6-a92d-225fc82bf1f1">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
+payload map (value,index) ->
 {
-  codigo: "1",
-  sigla: "VP",
-  nome: "Vice Prefeitura"
+  codigo: value.codigo,
+  sigla: value.sigla,
+  nome: value.nome
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
     <flow name="post:\orgaos:application\json:orgaos-cogel-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+        <db:insert doc:name="Insert" doc:id="0b3f5a07-a96a-4f75-bfdf-761c4b52d2bf" config-ref="PostgreSQL">
+			<db:sql >INSERT INTO orgao (codigo, sigla, nome) VALUES (:codigo, :sigla, :nome)</db:sql>
+			<db:input-parameters ><![CDATA[#[{codigo: payload.codigo, sigla: payload.sigla, nome: payload.nome}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="d2f864a0-7e71-4fc7-952b-3d1a763a7a50">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json

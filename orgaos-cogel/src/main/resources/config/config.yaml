@@ -1,6 +1,5 @@
 db:
-  host: "172.20.12.201"
-  port: "5432"
+  url: "jdbc:postgresql://172.20.12.201:5432/sipe-poc"
+  driver: "org.postgresql.Driver"
   user: "spmpoc"
   pwd: "spmpoc"
-  database: "sipe-poc"
