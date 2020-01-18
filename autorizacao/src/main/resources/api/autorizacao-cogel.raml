@@ -62,16 +62,28 @@ traits:
           200:
             body: 
               application/json:
-				example: !include exemplos/userinfo/email/get/response.json
+                example: !include exemplos/userinfo/email/get/response.json
           400:
             body: 
               application/json:
-				example: !include exemplos/userinfo/email/get/error.json
+                example: !include exemplos/userinfo/email/get/error.json
 
 /reset:
   /{email}:
     get:
       displayName: Resetar senha.
+      responses:
+        200:
+          body:
+            application/json:
+        400:
+          body:
+            application/json:
+            
+/groups:
+  /{email}:
+    get:
+      displayName: Obtem os grupos do usuário.
       responses:
         200:
           body:

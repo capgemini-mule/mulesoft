@@ -1,6 +1,7 @@
 {
   "nome": "John",
   "sobrenome": "Duo",
+  "username" : "jodoh",
   "cpf": "438.880.008-88",
   "email": "john.doe@example.com",
   "senha": "1234"

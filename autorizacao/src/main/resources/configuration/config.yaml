@@ -1,10 +1,15 @@
 ldap:
   dn: "cn=mulesoft,CN=Users,dc=semge,dc=poc"
   password: "X!wrU1m@S9zLTt?2AOyt"
-  url: "ldap://191.232.197.156:389"
+  url: "ldap://191.232.197.156"
+  fqdm_tls: "ldap://SRVPOCSEMGE.semge.poc"
+  fqdm_ssl: "ldaps://191.232.197.156:636"
+keystore:
+  path: "${mule.home}/apps/${app.name}/server.jks"
+  password: "capgemini"  
 email:
+  host: "smtp.gmail.com"
+  port: "587"
   user: "poccogel2020@gmail.com"
   password: "Mulesoft2020"
-  host: "imap.gmail.com"
-  port: "587"
-  from: "poccogel-noreply@gmail.com"
+  from: "poccogel2020@gmail.com"
