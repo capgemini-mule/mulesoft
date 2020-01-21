@@ -1,0 +1,32 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/dc3079af-d042-47a5-9717-1f3d0b952947/ # 
+version: 2.0.0
+title: Servicos-Cogel
+description: Mostra os serviços disponíveis para a POC baseados nas permissões do usuário.
+
+traits:
+  jwt:
+    headers:
+      authorization:
+        description: Bearer <JWT>
+        type: string
+    responses:
+      400:
+        description: Token não fornecido.
+      401:
+        description: Token expirado ou com erro. Para consertar faça uma nova autenticação.
+      403:
+        description: Falha na validação do client id.
+      503:
+        description: Erro de comunicação com o servidor JWKS.
+        
+/servicos:
+  get:
+    is: [jwt]
+    displayName: Lista serviços
+    description: Lista os serviços disponiveis para o usuário.
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include exemplos/servicos/get/response.json

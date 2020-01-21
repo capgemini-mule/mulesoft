@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:ldap="http://www.mulesoft.org/schema/mule/ldap" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/ldap http://www.mulesoft.org/schema/mule/ldap/current/mule-ldap.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+    <http:listener-config name="autorizacao-cogel-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="autorizacao-cogel-config" api="resource::5516948f-b6a3-4287-8522-29b5a750efac:autorizacao-cogel:2.0.4:raml:zip:autorizacao-cogel.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <configuration-properties doc:name="Configuration properties" doc:id="bb20ae70-1d8b-48ed-b117-dae953a5d89c" file="config/config.yaml" />
+	<ldap:config name="LDAP_Configuration" doc:name="LDAP Configuration" doc:id="9b210ac6-8b8c-4294-bc32-a3e5f8157fdf" >
+		<ldap:basic-connection authDn="${ldap.dn}" authPassword="${ldap.pwd}" url="${ldap.url}:636">
+			<ldap:extended-configurations >
+				<ldap:extended-configuration key="java.naming.ldap.factory.socket" value="org.mule.extension.ldap.internal.util.BypassTrustSSLSocketFactory" />
+			</ldap:extended-configurations>
+		</ldap:basic-connection>
+	</ldap:config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="b4c6bdd8-565a-4dda-9c99-bc654999455a" >
+		<email:smtp-connection host="${email.host}" port="${email.port}" user="${email.user}" password="${email.pwd}" >
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<http:request-config name="Request_Token" doc:name="HTTP Request configuration" doc:id="5ead0ede-dea4-4047-aba2-469f1aedc9fa" >
+		<http:request-connection protocol="HTTPS" host="pocsemge.brazilsouth.cloudapp.azure.com">
+			<tls:context >
+				<tls:trust-store insecure="true" />
+			</tls:context>
+		</http:request-connection>
+	</http:request-config>
+	<ldap:config name="LDAP_TROCAR_SENHA" doc:name="LDAP Configuration" doc:id="7fb38a3b-7d37-495f-a555-62d9bd915719" >
+		<ldap:basic-connection authDn="${ldap.dn}" authPassword="${ldap.pwd}" url="ldaps://SRVPOCSEMGE.semge.poc:636" >
+			<ldap:extended-configurations >
+				<ldap:extended-configuration key="java.naming.ldap.factory.socket" value="org.mule.extension.ldap.internal.util.BypassTrustSSLSocketFactory" />
+			</ldap:extended-configurations>
+		</ldap:basic-connection>
+	</ldap:config>
+	<flow name="autorizacao-cogel-main">
+        <http:listener config-ref="autorizacao-cogel-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="autorizacao-cogel-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="0b9bde0b-447d-476b-9400-1d52d076507f">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="autorizacao-cogel-console">
+        <http:listener config-ref="autorizacao-cogel-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="autorizacao-cogel-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="post:\signup:application\json:autorizacao-cogel-config">
+        <ee:transform doc:name="info do usuario" doc:id="2aa50c21-cf09-4ba9-a6dc-cd2e0368e703" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+{
+	dn : "cn=" ++ payload.email  ++ ",ou=Cidadaos,dc=semge,dc=poc",
+	userPrincipalName : payload.email,
+	cn : payload.email,
+	givenName: payload.nome,
+	sn : payload.sobrenome,
+	userPassword : payload.senha,
+	mail : payload.email ,
+	sAMAccountName: payload.username default payload.email,
+	pwdLastSet: "-1",
+	lockoutTime: "0",
+	userAccountControl: "544",
+	objectClass : ["top", "person", "organizationalPerson", "user"]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ldap:add doc:name="cria usuario" doc:id="5673da8e-146a-4456-945e-d2a4f12b63d2" config-ref="LDAP_Configuration" structuralObjectClass="user"/>
+		<email:send doc:name="envia email de boas vindas" doc:id="c6c16f98-0245-430d-ae99-3b62efe2a475" config-ref="Email_SMTP" fromAddress="${email.from}" subject="Bem-vindo ao APP da Prefeitura!">
+			<email:to-addresses >
+				<email:to-address value="#[payload.mail]" />
+			</email:to-addresses>
+			<email:body contentType="text/plain" encoding="UTF-8">
+				<email:content ><![CDATA[#[%dw 2.0
+output text/plain
+---
+
+"Obrigado por se inscrever no APP da Prefeitura!
+
+Para fazer login facilmente mais tarde, salve este URL:
+https://anypoint.mulesoft.com/accounts/login/capgeminicogel
+ 
+Nome do usuário:"
+++ payload.mail ++ "
+ 
+Mais uma vez, bem-vindo ao APP da Prefeitura!"]]]></email:content>
+			</email:body>
+		</email:send>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="a72a8012-b118-455b-bab2-b86eb38dfb2b" doc:name="retorno">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Cadastro concluído com sucesso. Você pode fazer login com suas credenciais!!!"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="Error Continue" doc:id="c5c25597-d2a0-4957-a038-e0100e68e58c" type="LDAP:CONTEXT_NOT_EMPTY, LDAP:INVALID_ATTRIBUTE, LDAP:INVALID_ENTRY, LDAP:NAME_ALREADY_BOUND, LDAP:NAME_NOT_FOUND, LDAP:OPERATION_NOT_SUPPORTED, LDAP:PERMISSION, LDAP:RETRY_EXHAUSTED, LDAP:UNKNOWN, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED" >
+				<logger level="INFO" doc:name="Logger" doc:id="104d9bdd-9d61-45db-a29a-ce222f99dee2" message='#["nao foi cadastrado - erro na criacao!"]' />
+				<set-variable value="403" doc:name="Set Variable" doc:id="fa284315-7134-442b-82ea-798cb0cc14f1" variableName="status" />
+				<ee:transform doc:name="Transform Message" doc:id="a14cbf14-dc2d-4628-8527-eaf8b3bead01" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+---
+{
+  message: "Não foi possivel efetuar o cadastro. Usuário inválido ou já existente."
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="801bfe8b-d948-4f28-b36f-67c711725e4e" type="EMAIL:CONNECTIVITY, EMAIL:RETRY_EXHAUSTED, EMAIL:SEND" >
+				<logger level="INFO" doc:name="Logger" doc:id="a4744982-f3e5-405b-9f8d-37f15651cc69" message='#["cadastrado criado - erro no email!"]' />
+				<ee:transform doc:name="Transform Message" doc:id="5b958835-1fd8-4b91-83b3-076b3b0042a2" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Sua conta foi criada, mas por algum motivo não conseguimos enviar um e-mail para você!"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="28f6da53-1696-48bd-8ae8-b98e77c0dbde" type="LDAP:COMMUNICATION, LDAP:CONNECTIVITY" >
+				<logger level="INFO" doc:name="Logger" doc:id="2c4dda05-6d4a-4f5d-b546-325b10843011" message='#["erro na conexao!"]' />
+				<set-variable value="500" doc:name="Set Variable" doc:id="9799ec96-e9a2-4d52-be52-302d63ba14eb" variableName="status" />
+				<ee:transform doc:name="Transform Message" doc:id="c37dea29-1627-44e9-af4d-da087bf62c2f" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+---
+{
+  message: "Erro, por favor tente mais tarde!"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+    </flow>
+	<flow name="post:\token:application\json:autorizacao-cogel-config">
+        <ee:transform doc:name="info do usuario" doc:id="7ad79479-a912-4dc3-a238-1c9954344b2c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::core::URL
+output application/x-www-form-urlencoded
+---
+{
+	username: decodeURI("SEMGE" ++ "\m" replace "m" with (payload.username)),
+	password: payload.password,
+	grant_type: "password",
+	client_id: "2620308e-92b6-4bb3-96f8-15b734406c74",
+	client_secret: "Xed8jE0ZNdxg_E5Pcq6Gjx07lIfPIiUFo7g0r8wc"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="solicitacao do token" doc:id="f45de862-84b6-4773-89b8-c29489e90118" path="/adfs/oauth2/token" config-ref="Request_Token"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="dfddef64-bde7-4218-a172-3119f17da3c7" doc:name="retorno">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"access_token": payload.access_token,
+    "token_type": payload.token_type,
+    "expires_in": payload.expires_in
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="get:\userinfo\(email):autorizacao-cogel-config">
+        <ldap:lookup doc:name="recupera info do usuario" doc:id="03714a43-7ec9-4785-9d67-852bbdb9b6fa" config-ref="LDAP_Configuration" dn="#[&quot;cn=&quot; ++ attributes.uriParams.'email' ++ &quot;,ou=Cidadaos,dc=semge,dc=poc&quot;]"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="116a64d4-fd6c-4948-b39f-53f4ca09ae7f" doc:name="retorno">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+---
+{
+  nome: payload.givenName,
+  sobrenome: payload.sn,
+  cpf: payload.uid,
+  email: payload.mail,
+  senha: payload.userPassword,
+  groups: payload.memberOf
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="get:\groups\(email):autorizacao-cogel-config">
+        <ldap:lookup doc:name="recupera info do usuario" doc:id="2057a860-b445-4833-9a9b-b11d1d9a56fe" config-ref="LDAP_Configuration" dn="#[&quot;cn=&quot; ++ attributes.uriParams.'email' ++ &quot;,ou=Cidadaos,dc=semge,dc=poc&quot;]"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="6c2a0705-f58c-4a12-8796-fc1a1b69007d" doc:name="retorno">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	groups: payload.memberOf
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\reset\(email):autorizacao-cogel-config">
+        <set-variable value='#["http://login-cogel-v1.us-e2.cloudhub.io/api/reset/" ++ attributes.uriParams.email ++ "/SMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"]' doc:name="endopoint" doc:id="756f89fc-6ff7-4786-96da-7a92af6f9ff3" variableName="action"/>
+        <ldap:modify-single-value-attribute doc:name="add token no usuario" doc:id="d7297978-7fd2-452d-b389-022c2d1bc6eb" config-ref="LDAP_Configuration" attributeName="info" attributeValue="SMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" dn="#[&quot;cn=&quot; ++ attributes.uriParams.'email' ++ &quot;,ou=Cidadaos,dc=semge,dc=poc&quot;]"/>
+		<email:send doc:name="envia email de reset de senha" doc:id="fe78fc92-1a6f-466e-b33e-bd1870ff5fbb" config-ref="Email_SMTP" fromAddress="${email.from}" subject="APP Prefeitura - Troca de Senha">
+			<email:to-addresses >
+				<email:to-address value="#[attributes.uriParams.email]" />
+			</email:to-addresses>
+			<email:body contentType="text/plain">
+				<email:content ><![CDATA[#[%dw 2.0
+output text/plain
+---
+
+"Olá,
+
+Recebemos uma solicitação para redefinir sua senha. 
+Clique no link abaixo para escolher uma nova senha. Se você não solicitou isso, nenhuma ação é necessária.
+
+Para redefinir sua senha, siga este link: " ++ vars.action ++ "
+ 
+Obrigado!
+
+- Equipe Cogel"]]]></email:content>
+			</email:body>
+		</email:send>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="949f32dc-ebdf-4642-bf80-2e17c2336334" doc:name="retorno">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "As instruções para recuperar ou redefinir suas credenciais foram enviadas ao seu email. Se você não receber um e-mail dentro de alguns minutos, verifique sua pasta de spam!!!"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\reset\(email)\(tokenpwd):autorizacao-cogel-config">
+		<parse-template doc:name="template html" doc:id="24c6a5a4-6f08-419d-b7fe-1761b9c469b5">
+			<content>&lt;html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;title&gt;SEMGE&lt;/title&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css&quot;&gt;
+  &lt;script src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;div class=&quot;container&quot;&gt;
+  &lt;h2&gt;Reset de senha APP Prefeitura&lt;/h2&gt;
+
+  &lt;form action=&quot;/api/reset/#[message.attributes.uriParams.email]/#[message.attributes.uriParams.tokenpwd]&quot; method=&quot;post&quot; target=&quot;_blank&quot;&gt;
+    &lt;div class=&quot;form-group&quot;&gt;
+
+      &lt;input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;senha&quot; name=&quot;senha&quot; placeholder=&quot;Nova Senha&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-group&quot;&gt;
+
+      &lt;input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;pwd&quot; name=&quot;password&quot; placeholder=&quot;Confirmar Senha&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-group&quot;&gt;
+      &lt;input type=&quot;hidden&quot; class=&quot;form-control&quot; id=&quot;tokenpwd&quot; name=&quot;tokenpwd&quot; value=&quot;#[message.attributes.uriParams.tokenpwd]&quot;&gt;
+    &lt;/div&gt;
+     &lt;div class=&quot;form-group&quot;&gt;
+      &lt;input type=&quot;hidden&quot; class=&quot;form-control&quot; id=&quot;email&quot; name=&quot;email&quot; value=&quot;#[message.attributes.uriParams.email]&quot;&gt;
+    &lt;/div&gt;
+    &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot;&gt;Trocar Senha&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</content>
+		</parse-template>
+    </flow>
+	<flow name="post:\reset\(email)\(tokenpwd)">
+		<http:listener doc:name="Listener" doc:id="7fc5934a-8aee-42a2-b3f0-aae18133a0cb" config-ref="autorizacao-cogel-httpListenerConfig" path="/api/reset/{email}/{tokenpwd}" allowedMethods="POST"/>
+		<ee:transform doc:name="info reset senha" doc:id="86777933-8b06-4c5e-ae64-2ae04692199e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+message.payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload.email]" doc:name="email" doc:id="dabe6ca5-77df-4409-b299-b39da954fe0c" variableName="email" />
+		<set-variable value="#[payload.senha]" doc:name="senha" doc:id="2364864f-021c-4cc8-9672-b58c10e4278c" variableName="senha" />
+		<set-variable value="#[payload.tokenpwd]" doc:name="token" doc:id="888f47d6-14f4-4da0-a603-0fc22804371a" variableName="token" />
+		<ldap:lookup doc:name="confere info usuario" doc:id="ed0ff5c4-f202-4ae3-9b20-8bfd6ca61b6e" config-ref="LDAP_Configuration" dn='#["cn=" ++ vars.email ++ ",ou=Cidadaos,dc=semge,dc=poc"]'/>
+		<choice doc:name="Choice" doc:id="c5ee4ab0-4e39-4e5a-89a9-24ed5ee086b1" >
+			<when expression="#[vars.token == payload.info and vars.email == payload.mail]" doc:id="a556f209-7439-4eaf-a563-2881ffaed2f8">
+				<ldap:modify-single-value-attribute doc:name="modifica token" doc:id="44ded6f6-18ba-4dd3-9383-9eec8a4c2868" config-ref="LDAP_Configuration" dn='#["cn=" ++ vars.email ++ ",ou=Cidadaos,dc=semge,dc=poc"]' attributeName="info" attributeValue="MeKKF2QT4fwpMeJf36POk6yJV_adQssw5" />
+				<ldap:modify-single-value-attribute doc:name="troca senha" doc:id="aaf85371-5f5c-4214-92b1-292c27d8602c" dn='#["cn=" ++ vars.email ++ ",ou=Cidadaos,dc=semge,dc=poc"]' attributeName="userPassword" attributeValue="#[vars.senha]" config-ref="LDAP_Configuration" />
+				<set-payload value='#[%dw 2.0
+output application/json
+---
+{
+	title: "Senha alterada",
+	message: "Você agora pode logar com a sua nova senha!!!"
+}]' doc:name="msg retorno" doc:id="2e724051-0b5d-4b9b-bc43-3c91b9676c6e" />
+			</when>
+			<otherwise >
+				<set-payload value='#[%dw 2.0
+output application/json
+---
+{
+	title: "Senha não alterada",
+	message: "Encontramos algum erro na operação, favor solicitar nova reset de senha."
+}]' doc:name="msg retorno" doc:id="9ed86099-9334-4b1e-b8f8-674f21e6d296" />
+			</otherwise>
+		</choice>
+		<set-variable value="#[payload.title]" doc:name="title" doc:id="53c6603e-cc63-465a-b8ce-a9c5f80b97f2" variableName="title"/>
+		<set-variable value="#[payload.message]" doc:name="message" doc:id="a8af0775-ec1e-4b8b-a7b8-b52462f0c581" variableName="message"/>
+		<ee:transform doc:name="form html" doc:id="edd38f27-e861-4315-bbae-276d73f40987" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[output application/xml writeDeclaration = false
+
+---
+
+html: {
+
+head: {
+	title: 'SEMGE'
+},
+body: {
+	div:{ 
+		
+	h2: "Reset de Senha",
+	h1: vars.title,
+	p: vars.message
+	
+	}
+	
+}
+
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="eb040624-1bf9-4dcf-9997-8d2c679a5922" encoding="UTF-8" mimeType="text/html"/>
+    </flow>
+	<flow name="post:\logout:autorizacao-cogel-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="1b7e1bf1-e08e-451a-88c8-8502f8480648" doc:name="retorno">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Logout realizado com sucesso!!!"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>

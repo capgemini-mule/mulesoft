@@ -1,0 +1,18 @@
+ldap:
+  dn: "cn=mulesoft,CN=Users,dc=semge,dc=poc"
+  pwd: "X!wrU1m@S9zLTt?2AOyt"
+  url: "ldap://191.232.197.156"
+  urltls: "ldaps://SRVPOCSEMGE.semge.poc:636"
+  
+keystore:
+  path: "/Users/astrenger/AnypointStudio/Cogel/autorizacao-cogel/src/main/resources/server.jks"
+  pwd: "capgemini"
+  
+  path2: "${mule.home}/apps/${app.name}/server.jks"
+
+email:
+  host: "smtp.gmail.com"
+  port: "587"
+  user: "poccogel2020@gmail.com"
+  pwd: "Mulesoft2020"
+  from: "poccogel2020@gmail.com"
